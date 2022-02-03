@@ -117,6 +117,5 @@ EXPOSE 22
 LABEL maintainer="Ivan Osuna Ayuste <ivan@iochannel.tech>"
 ################################################################
 
-
 RUN sudo apt autoclean
 
