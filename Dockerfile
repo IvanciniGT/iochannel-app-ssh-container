@@ -39,7 +39,7 @@ RUN ssh-keygen -A
 # Añadir configuración propia de ssh :
 #  - quitar los mensajes de bienvenida
 #  - desactivar las conexiones via password
-COPY ./sshd_config /etc/ssh/sshd_config
+COPY resources/sshd_config /etc/ssh/sshd_config
 # Desactivar ejecución de motd (más mensajes al hacer login)
 RUN chmod -x /etc/update-motd.d/*
 # Crear carpeta para albergar el pid de sshd
@@ -74,7 +74,7 @@ RUN mkdir -p ~/.cache/ && > ~/.cache/motd.legal-displayed
 # CONFIGURACION DE SU SHELL: BASH
 ################################################################
 # Añadimos fichero propio bash_profile
-COPY ./bash_profile /home/alumno/.bash_profile
+COPY resources/bash_profile /home/alumno/.bash_profile
 # Autocompletado de la bash
 RUN cd /tmp \
  && wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash \
@@ -83,7 +83,7 @@ RUN cd /tmp \
 ################################################################
 # COMANDO DE ARRANQUE DEL CONTENEDOR
 ################################################################
-COPY ./init.sh /init.sh
+COPY resources/init.sh /init.sh
 RUN sudo chmod 0755 /init.sh
 CMD ["/bin/bash", "-c", "/init.sh"]
 
