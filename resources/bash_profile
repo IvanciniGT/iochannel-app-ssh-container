@@ -13,8 +13,8 @@ if [ -f ~/.git-completion.bash ]; then
    source ~/.git-completion.bash
 fi
 
-[[ -n "$USER_NAME" ]] && git config --global user.name "$USER_NAME"
-[[ -n "$USER_EMAIL" ]] && git config --global user.email "$USER_EMAIL"
+[[ -n "$GIT_USER_NAME" ]] && git config --global user.name "$GIT_USER_NAME"
+[[ -n "$GIT_USER_EMAIL" ]] && git config --global user.email "$GIT_USER_EMAIL"
 git config --global color.ui true
 
 cd /home/alumno/environment

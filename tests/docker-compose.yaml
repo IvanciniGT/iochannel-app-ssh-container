@@ -1,0 +1,29 @@
+version: "3.5"
+
+services:
+    ssh-container:
+        build:
+            context: ..
+            args:
+                USER_NAME: alumno
+                GIT_USER_NAME: "Alumno de IOChannel"
+                GIT_USER_EMAIL: "alumno@iochannel.tech"
+        image: iochannel/ssh-container:test-${IMAGE_VERSION}
+        container_name: "ssh_container"
+        volumes:
+            - clavesGeneradas:/generatedKeys:rw
+    ssh-test:
+        build:
+            context: .
+        environment:
+            USER: alumno
+            SSH_SERVER: ssh-container
+        image: iochannel/ssh-container-test:latest
+        container_name: "ssh_container_test"
+        depends_on: 
+            - ssh-container
+        volumes:
+            - clavesGeneradas:/keys:ro
+
+volumes:
+    clavesGeneradas:

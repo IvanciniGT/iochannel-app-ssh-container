@@ -1,21 +1,14 @@
-################################################################
-# USO
-################################################################
-# Solicitando generación de claves
-#   $ docker run --rm -v $PWD/keys:/generatedKeys \
-#                --name ssh-test iochannel/ssh-container:latest
-#
-# Suministrando la clave
-#   $ docker run --rm -v $PWD/keys/public:/publicKey \
-#                --name ssh-test iochannel/ssh-container:latest
-#
-# Para acceder al contenedor via ssh
-#   $ ssh -i keys/publica alumno@172.17.0.2
-#   $ ssh -i keys/publica -o StrictHostKeyChecking=no \
-#         -l "alumno" "172.17.0.2"
-################################################################
 
 FROM ubuntu:20.04
+
+################################################################
+# ARGUMENTOS PARA LA GENERACION DE LA IMAGEN
+################################################################
+ARG USER_NAME=alumno
+# Nombre del alumno para registrar en git
+ARG GIT_USER_NAME="Alumno de IOChannel"
+# Email del alumno para registrar en git
+ARG GIT_USER_EMAIL="alumno@iochannel.tech"
 
 ################################################################
 # INSTALACION DE SOFTWARE
@@ -49,18 +42,18 @@ RUN mkdir /run/sshd \
 ################################################################
 # CREACION DEL USUARIO QUE CONECTARA MEDIANTE SSH
 ################################################################
-# El usuario se llama alumno, con grupo alumno
+# El usuario se llama $USER_NAME, con grupo $USER_NAME
 # No tiene contraseña
-RUN groupadd -g 999 alumno && useradd -u 999 -g alumno -G sudo -m -s /bin/bash alumno
+RUN groupadd -g 999 $USER_NAME && useradd -u 999 -g $USER_NAME -G sudo -m -s /bin/bash $USER_NAME
 # Se añade a los sudoers
 # Se desactiva de los suoders la necesidad de escribir el password
 RUN sed -i /etc/sudoers -re 's/^%sudo.*/%sudo ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
     sed -i /etc/sudoers -re 's/^root.*/root ALL=(ALL:ALL) NOPASSWD: ALL/g' && \
     sed -i /etc/sudoers -re 's/^#includedir.*/## **Removed the include directive** ##"/g' && \
-    echo "alumno ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
-USER alumno
+    echo "$USER_NAME ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers
+USER $USER_NAME
 # Creamos la carpeta de trabajo
-RUN mkdir -p /home/alumno/environment
+RUN mkdir -p /home/$USER_NAME/environment
 
 ################################################################
 # CONFIGURACIONES SSH DEL USUARIO
@@ -74,11 +67,11 @@ RUN mkdir -p ~/.cache/ && > ~/.cache/motd.legal-displayed
 # CONFIGURACION DE SU SHELL: BASH
 ################################################################
 # Añadimos fichero propio bash_profile
-COPY resources/bash_profile /home/alumno/.bash_profile
+COPY resources/bash_profile /home/$USER_NAME/.bash_profile
 # Autocompletado de la bash
 RUN cd /tmp \
  && wget https://raw.githubusercontent.com/git/git/master/contrib/completion/git-completion.bash \
- && mv git-completion.bash /home/alumno/.git-completion.bash
+ && mv git-completion.bash /home/$USER_NAME/.git-completion.bash
 
 ################################################################
 # COMANDO DE ARRANQUE DEL CONTENEDOR
@@ -93,7 +86,7 @@ CMD ["/bin/bash", "-c", "/init.sh"]
 # Archivo para que opcionalmente se suministra la clave publica 
 # con la que conectarse y que debe registrarse
 RUN sudo touch /publicKey \
- && sudo chmod 0744 /publicKey
+ && sudo chmod 0777 /publicKey
 # Carpeta para las claves generadas si no pasan una publica
 RUN sudo mkdir /generatedKeys \
  && sudo chmod 0777 /generatedKeys
@@ -105,14 +98,14 @@ VOLUME [/publicKey]
 # VARIABLES DE ENTORNO
 ################################################################
 # Nombre del alumno para registrar en git
-ENV USER_NAME="Alumno de IOChannel"
+ENV GIT_USER_NAME=$USER_NAME
 # Email del alumno para registrar en git
-ENV USER_EMAIL="alumno@iochannel.tech"
+ENV GIT_USER_EMAIL=$USER_EMAIL
 
 ################################################################
 # OTRAS CONFIGURACIONES
 ################################################################
-WORKDIR /home/alumno/environment
+WORKDIR /home/$USER_NAME/environment
 EXPOSE 22
 LABEL maintainer="Ivan Osuna Ayuste <ivan@iochannel.tech>"
 ################################################################
